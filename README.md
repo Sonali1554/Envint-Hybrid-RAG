@@ -154,9 +154,10 @@ Comparative matrix on the **evaluation split** (14 queries: 12 relevance queries
 
 | strategy | Precision@5 | Recall@5 | MRR | NDCG@5 | p50 (ms) | p95 (ms) | peak RSS (MB) |
 |----------|------------:|---------:|----:|-------:|---------:|---------:|--------------:|
-| vector   | 0.175 | 0.875 | 0.813 | 0.829 | 0.33 | 1.05 | 112.6 |
-| hybrid   | 0.175 | 0.875 | 0.875 | 0.865 | 0.45 | 0.48 | 112.6 |
-| rerank   | 0.200 | 1.000 | 0.938 | 0.944 | 0.60 | 0.75 | 112.6 |
+
+| vector   | 0.2167 | 1.000 | 0.9167 | 0.9318 | 19.23 | 29.75 | 556.3 |
+| hybrid   | 0.2167 | 1.000 | 0.9167 | 0.9385 | 16.42 | 22.46 | 538.3 |
+| rerank   | 0.2167 | 1.000 | 0.9583 | 0.9692 | 872.96 | 952.24 | 1151 |
 
 **Interpretation (Pareto).**
 - **Quality rises monotonically** vector â†’ hybrid â†’ rerank on every ranking
