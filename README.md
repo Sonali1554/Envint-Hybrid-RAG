@@ -1,4 +1,4 @@
-﻿# Envint â€” Advanced Hybrid Retrieval & Reranking Benchmark (Option B)
+﻿# Envint Advanced Hybrid Retrieval & Reranking Benchmark (Option B)
 
 A high-precision compliance QA engine over policy & operations manuals that
 implements and **benchmarks three retrieval strategies**, with LLM guardrails,
