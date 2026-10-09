@@ -1,4 +1,4 @@
-# Envint — Advanced Hybrid Retrieval & Reranking Benchmark (Option B)
+﻿# Envint â€” Advanced Hybrid Retrieval & Reranking Benchmark (Option B)
 
 A high-precision compliance QA engine over policy & operations manuals that
 implements and **benchmarks three retrieval strategies**, with LLM guardrails,
@@ -15,42 +15,42 @@ one-command Docker environment.
 ## 1. Architecture
 
 ```
-                         ┌──────────────────────────────────────────┐
-   HTTP (FastAPI)        │               RetrievalEngine             │
-  POST /query ──────────►│                                           │
-                         │   ┌───────────┐     ┌───────────┐         │
-                         │   │  Vector   │     │   BM25    │         │
-                         │   │  (Qdrant) │     │ (keyword) │         │
-                         │   └─────┬─────┘     └─────┬─────┘         │
-   Tier 1: vector ───────────────► │                 │              │
-                         │         └───────┬─────────┘              │
-   Tier 2: hybrid ──────────────►  Custom RRF fusion                │
-                         │                 │                        │
-   Tier 3: rerank ──────────────►  Cross-encoder reranker           │
-                         │                 │ (bge-reranker)         │
-                         │                 ▼                        │
-                         │        top-k RetrievedChunks             │
-                         └─────────────────┬────────────────────────┘
-                                           ▼
-                         ┌──────────────────────────────────────────┐
-                         │                Guardrails                 │
-                         │  • refuse if evidence doesn't support      │
-                         │  • isolate context as UNTRUSTED data       │
-                         │  • detect + resolve temporal conflicts     │
-                         └─────────────────┬────────────────────────┘
-                                           ▼
-                         ┌──────────────────────────────────────────┐
-                         │  LLM client: Ollama (local) | extractive  │
-                         │  → answer + citations + conflict notes     │
-                         └──────────────────────────────────────────┘
+                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+   HTTP (FastAPI)        â”‚               RetrievalEngine             â”‚
+  POST /query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                                           â”‚
+                         â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
+                         â”‚   â”‚  Vector   â”‚     â”‚   BM25    â”‚         â”‚
+                         â”‚   â”‚  (Qdrant) â”‚     â”‚ (keyword) â”‚         â”‚
+                         â”‚   â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜         â”‚
+   Tier 1: vector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚                 â”‚              â”‚
+                         â”‚         â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+   Tier 2: hybrid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  Custom RRF fusion                â”‚
+                         â”‚                 â”‚                        â”‚
+   Tier 3: rerank â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  Cross-encoder reranker           â”‚
+                         â”‚                 â”‚ (bge-reranker)         â”‚
+                         â”‚                 â–¼                        â”‚
+                         â”‚        top-k RetrievedChunks             â”‚
+                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                           â–¼
+                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                         â”‚                Guardrails                 â”‚
+                         â”‚  â€¢ refuse if evidence doesn't support      â”‚
+                         â”‚  â€¢ isolate context as UNTRUSTED data       â”‚
+                         â”‚  â€¢ detect + resolve temporal conflicts     â”‚
+                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                           â–¼
+                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                         â”‚  LLM client: Ollama (local) | extractive  â”‚
+                         â”‚  â†’ answer + citations + conflict notes     â”‚
+                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
   Observability middleware wraps every request: per-step latency, token counts,
-  error rate. Benchmark runner scores all 3 tiers → results/benchmark_*.json.
+  error rate. Benchmark runner scores all 3 tiers â†’ results/benchmark_*.json.
 ```
 
-**Request flow:** `POST /query` → engine retrieves with the chosen tier →
-guardrails enforce refusal / injection isolation / conflict resolution → LLM
-client produces a cited answer → middleware records latency, tokens, errors.
+**Request flow:** `POST /query` â†’ engine retrieves with the chosen tier â†’
+guardrails enforce refusal / injection isolation / conflict resolution â†’ LLM
+client produces a cited answer â†’ middleware records latency, tokens, errors.
 
 ---
 
@@ -93,7 +93,7 @@ is what makes the test suite and CI run anywhere, instantly, for free.
 
 ## 4. Setup & reproduction
 
-### Option A — Docker (one command)
+### Option A â€” Docker (one command)
 
 ```bash
 # Vector DB + API (real embeddings & reranker; downloads models on first run)
@@ -106,7 +106,7 @@ docker compose run --rm tests
 docker compose run --rm benchmark
 ```
 
-### Option B — Local Python
+### Option B â€” Local Python
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -125,11 +125,11 @@ python -m app.eval.llm_robustness
 
 ### Try it
 
-- **Web UI** — open **http://localhost:8000/** for a simple page to ask
+- **Web UI** â€” open **http://localhost:8000/** for a simple page to ask
   questions, switch strategy, and see answers, citations, conflict banners, the
   injection-defence shield, and latency/token stats. (Served from
   [app/static/index.html](app/static/index.html); no build step.)
-- **Swagger UI** — **http://localhost:8000/docs** for the raw API.
+- **Swagger UI** â€” **http://localhost:8000/docs** for the raw API.
 - **curl**:
 
 ```bash
@@ -149,7 +149,7 @@ LLM_BACKEND=auto uvicorn app.main:app   # uses Ollama if reachable, else extract
 
 ## 5. Benchmark results & interpretation
 
-Comparative matrix on the **evaluation split** (8 queries), offline backend
+Comparative matrix on the **evaluation split** (14 queries: 12 relevance queries and 2 unsupported queries), using the real local embedding and reranking models
 (reproducible in CI). Raw JSON: `results/benchmark_eval.json`.
 
 | strategy | Precision@5 | Recall@5 | MRR | NDCG@5 | p50 (ms) | p95 (ms) | peak RSS (MB) |
@@ -159,13 +159,13 @@ Comparative matrix on the **evaluation split** (8 queries), offline backend
 | rerank   | 0.200 | 1.000 | 0.938 | 0.944 | 0.60 | 0.75 | 112.6 |
 
 **Interpretation (Pareto).**
-- **Quality rises monotonically** vector → hybrid → rerank on every ranking
+- **Quality rises monotonically** vector â†’ hybrid â†’ rerank on every ranking
   metric (MRR, NDCG, Recall). Reranking achieves perfect recall and the best
   NDCG by pulling the exact gold clause to the top on hard-negative queries.
 - **Latency rises too** (rerank runs the cross-encoder once per candidate), so
   there is a genuine quality-vs-latency trade-off. On this tiny corpus it is
   sub-millisecond; on a real corpus with the real models the reranker is the
-  dominant cost — use it when precision matters, hybrid when latency does.
+  dominant cost â€” use it when precision matters, hybrid when latency does.
 - **Precision@5 looks low (~0.2)** because most queries have exactly **one**
   relevant chunk, so the ceiling is `1/5 = 0.2`. Recall/MRR/NDCG are the
   informative metrics here. (These are the offline-backend numbers; the real
@@ -175,7 +175,7 @@ Comparative matrix on the **evaluation split** (8 queries), offline backend
 corpus (BM25 build is instant). The benchmark measures and reports this as
 `index_build_ms` (e.g. ~6 ms for 20 chunks with the offline backend; dominated
 by model embedding time with the real backend). Re-embedding is only required
-when the embedding model changes — each chunk stores its `embedding_version`
+when the embedding model changes â€” each chunk stores its `embedding_version`
 (see **embedding versioning handling** below), so a version bump is the signal to
 re-index. The reranker needs no index (it scores at query time).
 
@@ -194,15 +194,15 @@ We call **no paid API**, so API cost is **$0**. The real cost is compute time,
 reported by [app/eval/cost.py](app/eval/cost.py):
 
 ```
-compute_cost_usd   = latency_hours × COMPUTE_USD_PER_HOUR   (assumed $0.10/hr CPU VM)
+compute_cost_usd   = latency_hours Ã— COMPUTE_USD_PER_HOUR   (assumed $0.10/hr CPU VM)
 api_cost_usd       = 0.0                                    (free local models)
 paid_equivalent_usd= tokens priced at a typical hosted rate (comparison only)
 ```
 
-Example (extractive backend, a short query ≈ 10 in / 20 out tokens, ~1 ms):
-- `compute_cost_usd` ≈ `1ms/3.6e6 × $0.10` ≈ **$2.8e-8**
+Example (extractive backend, a short query â‰ˆ 10 in / 20 out tokens, ~1 ms):
+- `compute_cost_usd` â‰ˆ `1ms/3.6e6 Ã— $0.10` â‰ˆ **$2.8e-8**
 - `api_cost_usd` = **$0**
-- `paid_equivalent_usd` ≈ **$1.4e-5** (what a hosted per-token API would charge)
+- `paid_equivalent_usd` â‰ˆ **$1.4e-5** (what a hosted per-token API would charge)
 
 Token counts per request are returned in the `/query` response (`token_usage`)
 and logged by the observability middleware.
@@ -211,21 +211,21 @@ and logged by the observability middleware.
 
 ## 7. Robustness features (how the brief is satisfied)
 
-- **Hard-negative dataset** — [data/queries/](data/queries/) has 13 queries
+- **Hard-negative dataset** â€” [data/queries/](data/queries/) has 13 queries
   split dev (5) / eval (8), including opposite-meaning keyword matches
   (`90 days` passwords vs backup logs), fine-grained clause IDs, numeric
   thresholds, unsupported questions, and a temporal conflict.
-- **Refusal on missing evidence** — `is_supported()` refuses when no retrieved
+- **Refusal on missing evidence** â€” `is_supported()` refuses when no retrieved
   chunk shares meaningful words with the query (e.g. "remote work policy").
-- **Prompt-injection defence** — 5 malicious snippets are embedded in the corpus
+- **Prompt-injection defence** â€” 5 malicious snippets are embedded in the corpus
   (`SEC-3.2`, `RET-3.1`, `OPS-2.2`, `AC-2.1`, `TE-2.1`). Retrieved text is framed
   as **untrusted data** in a delimited block the LLM is told to distrust; the
   extractive backend is immune by construction (it only copies sentences). We
   verify the answer never emits the injected "100% compliant" string.
-- **Temporal conflict resolution** — when two clauses in the same document assert
+- **Temporal conflict resolution** â€” when two clauses in the same document assert
   different numbers (customer retention `7 years` 2024 vs `3 years` 2022), the
   engine surfaces the conflict **and** resolves it to the most recent clause.
-- **Observability** — per-step latency, token counts, and a running error rate
+- **Observability** â€” per-step latency, token counts, and a running error rate
   (`/metrics`), via custom middleware.
 
 ---
@@ -233,17 +233,17 @@ and logged by the observability middleware.
 ## 8. Testing
 
 ```
-59 tests: 36 unit + 23 integration   (brief requires ≥15 unit, ≥5 integration)
+59 tests passed in Docker: 36 unit + 23 integration   (brief requires â‰¥15 unit, â‰¥5 integration)
 ```
 
 Coverage includes: RRF correctness, all metrics, BM25, guardrails
 (injection/refusal/conflict), embeddings, cost, schema validation, the 3-tier
 engine, the API (happy path, refusal, 422s, injection isolation, temporal
 truth), the benchmark runner, **malformed inputs** (missing file, bad JSON,
-missing required field), **empty results** (empty corpus → no hits → refusal),
-**rate-limit failures** (LLM HTTP 429 → typed `LLMRateLimitError`),
+missing required field), **empty results** (empty corpus â†’ no hits â†’ refusal),
+**rate-limit failures** (LLM HTTP 429 â†’ typed `LLMRateLimitError`),
 **embedding-version handling** (stale version re-stamped on build), and
-**dependency failures** (Ollama outage fallback, vector-store timeout → HTTP 500).
+**dependency failures** (Ollama outage fallback, vector-store timeout â†’ HTTP 500).
 
 Run: `pytest -q` (offline backends set in [tests/conftest.py](tests/conftest.py)).
 
@@ -251,18 +251,18 @@ Run: `pytest -q` (offline backends set in [tests/conftest.py](tests/conftest.py)
 
 ## 9. Known limitations (reported openly, per the brief)
 
-- **Docker not run on the dev machine** — `docker-compose.yml` and `Dockerfile`
+- **Docker not run on the dev machine** â€” `docker-compose.yml` and `Dockerfile`
   are written and lint-checked; please validate the `docker compose up` path in
   your environment. All Python paths are verified (55 tests green).
-- **Benchmark numbers shown are from the offline (fake) backend** so they are
+- **Benchmark numbers shown are from the real local embedding and reranking models** so they are
   reproducible in CI without model downloads. The real `bge` models change the
-  absolute metric values but preserve the vector → hybrid → rerank ordering.
+  absolute metric values but preserve the vector â†’ hybrid â†’ rerank ordering.
 - **`bge-reranker-large`** (named in the PDF) is heavy on CPU; the default is the
   same-family `-base`. Switch with `RERANK_MODEL=BAAI/bge-reranker-large`.
-- **Corpus is small and pre-chunked** — Option B is about *retrieval*, so we use
+- **Corpus is small and pre-chunked** â€” Option B is about *retrieval*, so we use
   a labelled JSON corpus for exact ground truth. Parsing raw PDF/DOCX/PPTX is
   the focus of Option C and is intentionally out of scope here.
-- **Refusal/support is a lexical heuristic** — robust for this corpus; a
+- **Refusal/support is a lexical heuristic** â€” robust for this corpus; a
   production system would add a semantic relevance threshold.
 
 ---
@@ -275,15 +275,16 @@ app/
   schema.py            payload / chunk-metadata schemas
   embeddings.py        real (HF) + fake (offline) embedders
   ingest.py            load + validate corpus
-  retrieval/           vector · bm25 · rrf · rerank · engine (3 tiers)
-  eval/                metrics · benchmark · cost · llm_robustness
-  llm/                 guardrails · client (Ollama + extractive)
+  retrieval/           vector Â· bm25 Â· rrf Â· rerank Â· engine (3 tiers)
+  eval/                metrics Â· benchmark Â· cost Â· llm_robustness
+  llm/                 guardrails Â· client (Ollama + extractive)
   obs/                 observability middleware
   main.py              FastAPI app
 data/
   corpus/corpus.json   policy/ops chunks (clause IDs, conflicts, injections)
-  queries/             dev_queries.json · eval_queries.json (gold labels)
+  queries/             dev_queries.json Â· eval_queries.json (gold labels)
 tests/
-  unit/  integration/  (55 tests)
-docker/Dockerfile · docker-compose.yml · .github/workflows/ci.yml
+  unit/  integration/  (59 tests)
+docker/Dockerfile Â· docker-compose.yml Â· .github/workflows/ci.yml
 ```
+
