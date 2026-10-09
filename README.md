@@ -3,6 +3,10 @@ A high-precision compliance QA engine over policy & operations manuals that
 implements and benchmarks three retrieval strategies, with LLM guardrails,
 prompt-injection defence, temporal conflict resolution, observability, and a
 one-command Docker environment.
+
+DEMO:
+https://drive.google.com/file/d/1l4JaEPP1fBniKt-AnuS9pmupr_6IZitT/view?usp=sharing
+
 Quick links (when the app is running): 🚀 Web UI ·
 📚 Swagger API Docs ·
 ❤️ Health Check ·
