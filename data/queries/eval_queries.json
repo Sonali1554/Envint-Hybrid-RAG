@@ -1,0 +1,104 @@
+[
+  {
+    "id": "E1",
+    "query": "How often must account passwords be rotated?",
+    "relevant_chunk_ids": ["SEC-1.1"],
+    "type": "normal",
+    "notes": "Hard negative: RET-2.1 also says '90 days' but about backup logs, not passwords."
+  },
+  {
+    "id": "E2",
+    "query": "What authentication is required for administrator accounts?",
+    "relevant_chunk_ids": ["SEC-1.2"],
+    "type": "normal",
+    "notes": "Answer: MFA is mandatory for admin/privileged accounts."
+  },
+  {
+    "id": "E3",
+    "query": "Are we allowed to store passwords in plaintext?",
+    "relevant_chunk_ids": ["SEC-2.1"],
+    "type": "negative_constraint",
+    "notes": "Negative constraint: plaintext storage is prohibited. Answer must be 'no'."
+  },
+  {
+    "id": "E4",
+    "query": "How long must customer records be retained?",
+    "relevant_chunk_ids": ["RET-1.1"],
+    "type": "temporal_conflict",
+    "notes": "RET-1.1 (2024, 7 years) supersedes RET-1.2 (2022, 3 years). Current truth = 7 years."
+  },
+  {
+    "id": "E5",
+    "query": "Within what time must a terminated employee's access be revoked?",
+    "relevant_chunk_ids": ["AC-1.2"],
+    "type": "hard_negative",
+    "notes": "Hard negative: SEC-3.1 also mentions '24 hours' but for incident reporting."
+  },
+  {
+    "id": "E6",
+    "query": "What is the daily meal per diem for business travel?",
+    "relevant_chunk_ids": ["TE-1.1"],
+    "type": "normal",
+    "notes": "Answer: 75 USD per day."
+  },
+  {
+    "id": "E7",
+    "query": "What is the company's remote work policy?",
+    "relevant_chunk_ids": [],
+    "type": "unsupported",
+    "notes": "No clause covers remote work. The system must refuse, not invent an answer."
+  },
+  {
+    "id": "E8",
+    "query": "What retention periods for customer records appear across policy versions?",
+    "relevant_chunk_ids": ["RET-1.1", "RET-1.2"],
+    "type": "conflict",
+    "notes": "Both versions are relevant; the answer should surface the conflict and the resolution by date."
+  }
+
+  
+,
+  {
+    "id": "E9",
+    "query": "What is the exact requirement in clause OPS-1.1 for production change approvals?",
+    "relevant_chunk_ids": ["OPS-1.1"],
+    "type": "clause_id",
+    "notes": "Exact clause ID query; verify the two-independent-approvals requirement."
+  },
+  {
+    "id": "E10",
+    "query": "Does the help desk have 24 hours to respond to new tickets?",
+    "relevant_chunk_ids": ["OPS-3.1"],
+    "type": "hard_negative",
+    "notes": "Numeric hard negative: the ticket response SLA is 4 business-hours, not 24 hours."
+  },
+  {
+    "id": "E11",
+    "query": "Is plaintext password storage permitted even when administrator accounts use MFA?",
+    "relevant_chunk_ids": ["SEC-2.1"],
+    "type": "negative_constraint",
+    "notes": "Tests the distinction between MFA and the separate prohibition on plaintext password storage."
+  },
+  {
+    "id": "E12",
+    "query": "What is the exact password rotation interval specified in SEC-1.1?",
+    "relevant_chunk_ids": ["SEC-1.1"],
+    "type": "clause_id",
+    "notes": "Clause-specific retrieval; RET-2.1's matching 90-day value refers to backup logs, not passwords."
+  },
+  {
+    "id": "E13",
+    "query": "Can terminated employee access remain active for 48 hours after termination?",
+    "relevant_chunk_ids": ["AC-1.2"],
+    "type": "hard_negative",
+    "notes": "Numeric hard negative: distinguish the actual access-revocation deadline from unrelated 24-hour incident-reporting requirements."
+  },
+  {
+    "id": "E14",
+    "query": "What is the required encryption algorithm for stored customer records?",
+    "relevant_chunk_ids": [],
+    "type": "unsupported",
+    "notes": "Unsupported question: the corpus must not be treated as evidence for an unspecified encryption algorithm."
+  }
+
+]

@@ -1,0 +1,33 @@
+# Continuous Integration — runs on every push / pull request.
+# Free on GitHub Actions. Uses the offline (fake) backends so no model
+# downloads or external services are needed; the suite is fast and deterministic.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      EMBED_BACKEND: fake
+      RERANK_BACKEND: fake
+      LLM_BACKEND: extractive
+      QDRANT_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test suite
+        run: pytest -q
+
+      - name: Smoke-run the benchmark (dev split)
+        run: python -m app.eval.benchmark --split dev

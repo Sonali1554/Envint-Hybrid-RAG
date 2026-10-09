@@ -1,0 +1,70 @@
+# One-command environment for the assignment.
+#
+#   docker compose up --build api          -> Vector DB (Qdrant) + API
+#   docker compose run --rm tests          -> full test suite (offline backends)
+#   docker compose run --rm benchmark      -> retrieval benchmark matrix
+#
+# The "benchmark" one-shot service is our ingestion/evaluation worker (see
+# PLAN.md §7): Option B has no streaming ingestion worker, so we expose the
+# ingest+benchmark job as a dedicated short-lived service instead of a fake
+# idle daemon.
+
+services:
+  # ---- Vector database ----
+  qdrant:
+    image: qdrant/qdrant:v1.11.0
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  # ---- API (real embeddings + reranker, extractive LLM by default) ----
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      EMBED_BACKEND: real
+      RERANK_BACKEND: real
+      # Switch to "auto" and add an Ollama service to use a real local LLM.
+      LLM_BACKEND: extractive
+    depends_on:
+      - qdrant
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Full test suite (offline, free, deterministic backends) ----
+  tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      EMBED_BACKEND: fake
+      RERANK_BACKEND: fake
+      LLM_BACKEND: extractive
+      QDRANT_URL: ""        # in-memory Qdrant, no server needed for tests
+    command: ["pytest", "-q"]
+    profiles: ["test"]
+
+  # ---- Ingestion + benchmark worker (one-shot) ----
+  benchmark:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      EMBED_BACKEND: real
+      RERANK_BACKEND: real
+    command: ["python", "-m", "app.eval.benchmark", "--split", "eval"]
+    depends_on:
+      - qdrant
+    profiles: ["benchmark"]
+
+volumes:
+  qdrant_data:

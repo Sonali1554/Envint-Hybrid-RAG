@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Envint — Compliance RAG</title>
+<style>
+  /* ---- Design tokens (one place to change the look) ---- */
+  :root {
+    --bg: #0f1419; --panel: #1a2029; --panel-2: #222a35; --border: #2d3742;
+    --text: #e6edf3; --muted: #8b98a5; --accent: #3fb950; --accent-dim: #1f6f33;
+    --warn: #d29922; --danger: #f85149; --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header .tag { color: var(--accent); font-weight: 700; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px; }
+
+  /* ---- Query form ---- */
+  textarea {
+    width: 100%; min-height: 70px; resize: vertical; padding: 12px 14px;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius); font: inherit;
+  }
+  textarea:focus { outline: 2px solid var(--accent-dim); border-color: var(--accent); }
+  .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+  .strategies { display: flex; gap: 8px; }
+  .strategies label {
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px;
+    cursor: pointer; color: var(--muted); user-select: none; font-size: 13px;
+  }
+  .strategies input { display: none; }
+  .strategies input:checked + span { color: var(--text); }
+  .strategies label:has(input:checked) { border-color: var(--accent); background: var(--panel-2); }
+  button {
+    margin-left: auto; padding: 9px 20px; background: var(--accent); color: #04260d;
+    border: 0; border-radius: var(--radius); font-weight: 700; cursor: pointer;
+  }
+  button:disabled { opacity: .6; cursor: wait; }
+  .chips { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px; color: var(--muted); border: 1px dashed var(--border);
+    padding: 4px 10px; border-radius: 999px; cursor: pointer; background: transparent;
+  }
+  .chip:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ---- Results ---- */
+  .result { margin-top: 22px; background: var(--panel); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; }
+  .result h2 { font-size: 13px; margin: 0; padding: 10px 16px; color: var(--muted);
+               border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .badge.ok { background: var(--accent-dim); color: #d7ffe0; }
+  .badge.refused { background: #5a1e1e; color: #ffd7d7; }
+  .answer { padding: 16px; font-size: 15px; }
+  .banner { margin: 0 16px 14px; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+  .banner.conflict { background: #3a2f0b; border: 1px solid var(--warn); color: #ffe9b0; }
+  .banner.injection { background: #3a1416; border: 1px solid var(--danger); color: #ffd0cf; }
+  .cites { padding: 0 16px 14px; }
+  .cite { border-top: 1px solid var(--border); padding: 10px 0; display: grid;
+          grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; }
+  .cite .id { font-weight: 700; color: var(--accent); font-size: 13px; }
+  .cite .snip { color: var(--muted); font-size: 13px; }
+  .cite .score { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .foot { padding: 10px 16px; border-top: 1px solid var(--border); color: var(--muted);
+          font-size: 12px; display: flex; gap: 18px; flex-wrap: wrap; }
+  .err { color: var(--danger); padding: 14px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="tag">Envint</span> Compliance RAG</h1>
+  <span class="sub">Hybrid retrieval &amp; reranking over policy manuals</span>
+</header>
+
+<main>
+  <textarea id="q" placeholder="Ask a question about the policy corpus…">how long must customer records be retained?</textarea>
+
+  <div class="row">
+    <div class="strategies" role="radiogroup" aria-label="Retrieval strategy">
+      <label><input type="radio" name="strat" value="vector"><span>Vector</span></label>
+      <label><input type="radio" name="strat" value="hybrid"><span>Hybrid (RRF)</span></label>
+      <label><input type="radio" name="strat" value="rerank" checked><span>Rerank</span></label>
+    </div>
+    <button id="go">Ask</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div id="out"></div>
+</main>
+
+<script>
+// A few example questions so the page is usable without typing.
+const EXAMPLES = [
+  "how often must passwords be rotated?",
+  "are we allowed to store passwords in plaintext?",
+  "within what time must a terminated employee's access be revoked?",
+  "summarise the audit log review process",   // contains a hidden injection
+  "what is the company remote work policy?",   // unsupported -> should refuse
+];
+
+const chips = document.getElementById("chips");
+EXAMPLES.forEach(text => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = text;
+  b.onclick = () => { document.getElementById("q").value = text; ask(); };
+  chips.appendChild(b);
+});
+
+const esc = s => s.replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+
+async function ask() {
+  const query = document.getElementById("q").value.trim();
+  const strategy = document.querySelector('input[name="strat"]:checked').value;
+  const out = document.getElementById("out");
+  const btn = document.getElementById("go");
+  if (!query) { out.innerHTML = '<div class="result err">Please enter a question.</div>'; return; }
+
+  btn.disabled = true; btn.textContent = "Asking…";
+  out.innerHTML = "";
+  try {
+    const res = await fetch("/query", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query, strategy }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || ("HTTP " + res.status));
+    out.innerHTML = render(data);
+  } catch (e) {
+    out.innerHTML = '<div class="result err">Error: ' + esc(String(e.message)) + "</div>";
+  } finally {
+    btn.disabled = false; btn.textContent = "Ask";
+  }
+}
+
+function render(d) {
+  const badge = d.refused
+    ? '<span class="badge refused">REFUSED</span>'
+    : '<span class="badge ok">ANSWERED</span>';
+
+  let html = '<div class="result">';
+  html += '<h2>Result &nbsp;•&nbsp; strategy: ' + esc(d.strategy) + ' ' + badge + '</h2>';
+  html += '<div class="answer">' + esc(d.answer) + '</div>';
+
+  // Temporal conflict banner(s).
+  (d.conflicts || []).forEach(c => {
+    html += '<div class="banner conflict">⚖️ ' + esc(c) + '</div>';
+  });
+
+  // Injection-defence banner.
+  if ((d.injected_sources || []).length) {
+    html += '<div class="banner injection">🛡️ Prompt-injection detected in source(s) '
+          + esc(d.injected_sources.join(", "))
+          + ' — treated as data and ignored, not executed.</div>';
+  }
+
+  // Citations.
+  if ((d.citations || []).length) {
+    html += '<div class="cites">';
+    d.citations.forEach(c => {
+      html += '<div class="cite">'
+        + '<div class="id">' + esc(c.doc_id) + " · " + esc(c.clause_id) + '</div>'
+        + '<div class="snip">' + esc(c.snippet) + '</div>'
+        + '<div class="score">score ' + Number(c.score).toFixed(3) + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  const t = d.token_usage || {};
+  html += '<div class="foot">'
+    + '<span>⏱ ' + d.latency_ms + ' ms</span>'
+    + '<span>🔢 tokens in ' + (t.input ?? 0) + ' / out ' + (t.output ?? 0) + '</span>'
+    + '<span>📚 ' + (d.citations ? d.citations.length : 0) + ' citations</span>'
+    + '</div>';
+
+  html += '</div>';
+  return html;
+}
+
+document.getElementById("go").onclick = ask;
+// Ctrl/Cmd + Enter submits.
+document.getElementById("q").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") ask();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# --- Core retrieval / ML (all free, open-source) ---
+sentence-transformers==3.0.1
+--extra-index-url https://download.pytorch.org/whl/cpu
+rank-bm25==0.2.2
+qdrant-client==1.11.0
+numpy==1.26.4
+scikit-learn==1.5.1
+
+# --- API ---
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.8.2
+pydantic-settings==2.3.4
+
+# --- Testing ---
+pytest==8.2.2
+httpx==0.27.0
+
+# --- Utils ---
+python-multipart==0.0.9
+orjson==3.10.6
+psutil==6.0.0          # resource overhead (CPU% / memory) during benchmark
+requests==2.32.3       # talk to the free local Ollama LLM over HTTP
