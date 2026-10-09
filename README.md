@@ -217,6 +217,12 @@ embedding-version handling (stale version re-stamped on build), and
 dependency failures (Ollama outage fallback, vector-store timeout → HTTP 500).
 Run: `pytest -q` (offline backends set in tests/conftest.py).
 ---
+
+<img width="1920" height="1200" alt="Screenshot (1452)" src="https://github.com/user-attachments/assets/7b356222-519f-4d74-b947-65fb7686f44c" />
+
+<img width="1920" height="1200" alt="Screenshot (1453)" src="https://github.com/user-attachments/assets/dde49a0e-17dd-491d-9255-c21946da0112" />
+
+
 9. Known limitations (reported openly, per the brief)
 Small synthetic evaluation set — the reported benchmark uses 14 eval
 queries (12 labelled); larger independently authored evaluation sets are
