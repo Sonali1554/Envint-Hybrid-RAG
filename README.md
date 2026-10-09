@@ -222,6 +222,9 @@ Run: `pytest -q` (offline backends set in tests/conftest.py).
 
 <img width="1917" height="992" alt="image" src="https://github.com/user-attachments/assets/f8d64783-e1b1-42da-862c-b806c7217881" />
 
+<img width="1917" height="1031" alt="image" src="https://github.com/user-attachments/assets/a49a91fa-9755-4913-91ae-457f3f29b3e5" />
+
+
 
 
 9. Known limitations (reported openly, per the brief)
