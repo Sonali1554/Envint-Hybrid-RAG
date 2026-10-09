@@ -102,7 +102,7 @@ docker compose run --rm tests
 docker compose run --rm benchmark
 ```
 
-### Option B â€” Local Python
+### Option B Local Python
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
