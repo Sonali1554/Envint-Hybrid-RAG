@@ -14,35 +14,31 @@ one-command Docker environment.
 
 ## 1. Architecture
 
+
+```mermaid
+flowchart TD
+    A["Client / Browser"] --> B["FastAPI<br/>POST /query"]
+    B --> C["Retrieval Engine"]
+
+    C --> D["Tier 1: Vector Search<br/>Qdrant + Embeddings"]
+    C --> E["Tier 2: Hybrid Search<br/>BM25 + Vector + RRF"]
+    C --> F["Tier 3: Reranking<br/>Cross-Encoder"]
+
+    D --> G["Top-k Retrieved Chunks"]
+    E --> G
+    F --> G
+
+    G --> H["LLM Guardrails"]
+    H --> I["Evidence Check and Refusal"]
+    H --> J["Prompt-Injection Isolation"]
+    H --> K["Temporal Conflict Resolution"]
+
+    I --> L["Grounded Answer + Citations"]
+    J --> L
+    K --> L
+
+    L --> M["Response + Observability Metrics"]
 ```
-                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   HTTP (FastAPI)        â”‚               RetrievalEngine             â”‚
-  POST /query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                                           â”‚
-                         â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
-                         â”‚   â”‚  Vector   â”‚     â”‚   BM25    â”‚         â”‚
-                         â”‚   â”‚  (Qdrant) â”‚     â”‚ (keyword) â”‚         â”‚
-                         â”‚   â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜         â”‚
-   Tier 1: vector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚                 â”‚              â”‚
-                         â”‚         â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
-   Tier 2: hybrid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  Custom RRF fusion                â”‚
-                         â”‚                 â”‚                        â”‚
-   Tier 3: rerank â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  Cross-encoder reranker           â”‚
-                         â”‚                 â”‚ (bge-reranker)         â”‚
-                         â”‚                 â–¼                        â”‚
-                         â”‚        top-k RetrievedChunks             â”‚
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                           â–¼
-                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                         â”‚                Guardrails                 â”‚
-                         â”‚  â€¢ refuse if evidence doesn't support      â”‚
-                         â”‚  â€¢ isolate context as UNTRUSTED data       â”‚
-                         â”‚  â€¢ detect + resolve temporal conflicts     â”‚
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                           â–¼
-                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                         â”‚  LLM client: Ollama (local) | extractive  â”‚
-                         â”‚  â†’ answer + citations + conflict notes     â”‚
-                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
   Observability middleware wraps every request: per-step latency, token counts,
   error rate. Benchmark runner scores all 3 tiers â†’ results/benchmark_*.json.
