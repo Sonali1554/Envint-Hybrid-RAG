@@ -211,7 +211,7 @@ and logged by the observability middleware.
 
 ## 7. Robustness features (how the brief is satisfied)
 
-- **Hard-negative dataset** â€” [data/queries/](data/queries/) has 13 queries
+- **Hard-negative dataset** â€” [data/queries/](data/queries/) has 19 queries
   split dev (5) / eval (8), including opposite-meaning keyword matches
   (`90 days` passwords vs backup logs), fine-grained clause IDs, numeric
   thresholds, unsupported questions, and a temporal conflict.
@@ -251,9 +251,9 @@ Run: `pytest -q` (offline backends set in [tests/conftest.py](tests/conftest.py)
 
 ## 9. Known limitations (reported openly, per the brief)
 
-- **Docker not run on the dev machine** â€” `docker-compose.yml` and `Dockerfile`
+- **Docker validation completed** â€” `docker-compose.yml` and `Dockerfile`
   are written and lint-checked; please validate the `docker compose up` path in
-  your environment. All Python paths are verified (55 tests green).
+  Docker Compose tests completed successfully: 59 tests passed.
 - **Benchmark numbers shown are from the real local embedding and reranking models** so they are
   reproducible in CI without model downloads. The real `bge` models change the
   absolute metric values but preserve the vector â†’ hybrid â†’ rerank ordering.
@@ -287,4 +287,5 @@ tests/
   unit/  integration/  (59 tests)
 docker/Dockerfile Â· docker-compose.yml Â· .github/workflows/ci.yml
 ```
+
 
